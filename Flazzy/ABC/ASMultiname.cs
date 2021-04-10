@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Flazzy.IO;
 
@@ -220,6 +221,24 @@ namespace Flazzy.ABC
                     break;
                 }
             }
+        }
+
+        protected bool Equals(ASMultiname other)
+        {
+            return Kind == other.Kind && Name == other.Name && Equals(Namespace, other.Namespace);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((ASMultiname) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine((int) Kind, Name, Namespace.GetHashCode());
         }
     }
 }

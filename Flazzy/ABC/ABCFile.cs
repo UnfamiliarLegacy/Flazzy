@@ -104,8 +104,8 @@ namespace Flazzy.ABC
             if (multiname == null || !_classesCache.TryGetValue(multiname, out List<ASClass> classes)) yield break;
             for (int i = 0; i < classes.Count; i++)
             {
-                ASClass @class = classes[i];
-                if (@class.QName != multiname)
+                var @class = classes[i];
+                if (!@class.QName.Equals(multiname))
                 {
                     i--;
                     classes.RemoveAt(i);

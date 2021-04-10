@@ -62,5 +62,23 @@ namespace Flazzy.ABC
             output.Write((byte)Kind);
             output.WriteInt30(NameIndex);
         }
+
+        protected bool Equals(ASNamespace other)
+        {
+            return Kind == other.Kind && Name == other.Name;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((ASNamespace) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine((int) Kind, Name);
+        }
     }
 }
