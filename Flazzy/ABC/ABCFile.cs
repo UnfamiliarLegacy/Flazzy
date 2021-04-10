@@ -93,36 +93,43 @@ namespace Flazzy.ABC
             return index;
         }
 
-        public ASClass GetClass(ASMultiname multiname) => GetClasses(multiname).FirstOrDefault();
         public ASClass GetClass(string qualifiedName) => GetClass(GetMultiname(qualifiedName));
-
-        public ASInstance GetInstance(ASMultiname multiname) => GetInstances(multiname).FirstOrDefault();
-        public ASInstance GetInstance(string qualifiedName) => GetInstance(GetMultiname(qualifiedName));
-
-        public IEnumerable<ASClass> GetClasses(ASMultiname multiname)
+        public ASClass GetClass(ASMultiname multiname)
         {
-            if (multiname == null || !_classesCache.TryGetValue(multiname, out List<ASClass> classes)) yield break;
-            for (int i = 0; i < classes.Count; i++)
+            var result = GetClasses(multiname);
+            if (result == null || result.Count < 1)
             {
-                var @class = classes[i];
-                if (!@class.QName.Equals(multiname))
-                {
-                    i--;
-                    classes.RemoveAt(i);
-                    if (!_classesCache.TryGetValue(@class.QName, out List<ASClass> newClasses))
-                    {
-                        newClasses = new List<ASClass>();
-                        _classesCache.Add(@class.QName, newClasses);
-                    }
-                    newClasses.Add(@class);
-                }
-                else yield return @class;
+                return null;
             }
-        }
-        public IEnumerable<ASClass> GetClasses(string qualifiedName) => GetClasses(GetMultiname(qualifiedName));
 
-        public IEnumerable<ASInstance> GetInstances(ASMultiname multiname) => GetClasses(multiname).Select(c => c.Instance);
-        public IEnumerable<ASInstance> GetInstances(string qualifiedName) => GetInstances(GetMultiname(qualifiedName));
+            return result[0];
+        }
+
+        public ASInstance GetInstance(string qualifiedName) => GetInstance(GetMultiname(qualifiedName));
+        public ASInstance GetInstance(ASMultiname multiname)
+        {
+            var result = GetInstances(multiname);
+            if (result == null || result.Count < 1)
+            {
+                return null;
+            }
+
+            return result[0];
+        }
+
+        public List<ASClass> GetClasses(string qualifiedName) => GetClasses(GetMultiname(qualifiedName));
+        public List<ASClass> GetClasses(ASMultiname multiname)
+        {
+            if (multiname == null || !_classesCache.TryGetValue(multiname, out var classes))
+            {
+                return null;
+            }
+
+            return classes;
+        }
+
+        public List<ASInstance> GetInstances(string qualifiedName) => GetInstances(GetMultiname(qualifiedName));
+        public List<ASInstance> GetInstances(ASMultiname multiname) => GetClasses(multiname).Select(c => c.Instance).ToList();
 
         private ASMethod ReadMethod(int index)
         {
