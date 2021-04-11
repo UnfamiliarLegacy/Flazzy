@@ -238,7 +238,7 @@ namespace Flazzy.ABC
 
         public override int GetHashCode()
         {
-            return HashCode.Combine((int) Kind, Name, Namespace.GetHashCode());
+            return HashCode.Combine((int) Kind, Name, Namespace != null ? Namespace.GetHashCode() : 0);
         }
     }
 }

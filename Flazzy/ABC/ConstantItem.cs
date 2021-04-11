@@ -2,7 +2,7 @@
 {
     public abstract class ConstantItem : FlashItem
     {
-        protected ASConstantPool Pool { get; }
+        public ASConstantPool Pool { get; }
 
         public ConstantItem(ASConstantPool pool)
         {

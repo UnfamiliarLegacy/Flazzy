@@ -26,13 +26,13 @@ namespace Flazzy.ABC
 
         protected override string DebuggerDisplay => $"Namespaces: {NamespaceIndices.Count:n0}";
 
-        public IEnumerable<ASNamespace> GetNamespaces()
+        public IEnumerable<(int nsIndex, ASNamespace ns)> GetNamespaces()
         {
             for (int i = 0; i < NamespaceIndices.Count; i++)
             {
                 int namespaceIndex = NamespaceIndices[i];
                 ASNamespace @namespace = Pool.Namespaces[namespaceIndex];
-                yield return @namespace;
+                yield return (namespaceIndex, @namespace);
             }
         }
 
