@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using Flazzy.IO;
 
 namespace Flazzy.ABC
@@ -230,19 +230,19 @@ namespace Flazzy.ABC
                 return true;
             }
 
-            if (NameIndex != other.NameIndex)
+            if (!Equals(Name, other.Name))
             {
                 return false;
             }
             
             if (Kind == MultinameKind.QName && other.Kind == MultinameKind.Multiname)
             {
-                return other.NamespaceSet.NamespaceIndices.Contains(NamespaceIndex);
+                return other.NamespaceSet.GetNamespaces().Any(x => x.ns.Equals(Namespace));
             }
             
             if (Kind == MultinameKind.Multiname && other.Kind == MultinameKind.QName)
             {
-                return NamespaceSet.NamespaceIndices.Contains(other.NamespaceIndex);
+                return NamespaceSet.GetNamespaces().Any(x => x.ns.Equals(other.Namespace));
             }
 
             return false;
