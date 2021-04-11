@@ -223,6 +223,31 @@ namespace Flazzy.ABC
             }
         }
 
+        public bool IsMatch(ASMultiname other)
+        {
+            if (Equals(other))
+            {
+                return true;
+            }
+
+            if (NameIndex != other.NameIndex)
+            {
+                return false;
+            }
+            
+            if (Kind == MultinameKind.QName && other.Kind == MultinameKind.Multiname)
+            {
+                return other.NamespaceSet.NamespaceIndices.Contains(NamespaceIndex);
+            }
+            
+            if (Kind == MultinameKind.Multiname && other.Kind == MultinameKind.QName)
+            {
+                return NamespaceSet.NamespaceIndices.Contains(other.NamespaceIndex);
+            }
+
+            return false;
+        }
+
         protected bool Equals(ASMultiname other)
         {
             return Kind == other.Kind && Name == other.Name && Equals(Namespace, other.Namespace);

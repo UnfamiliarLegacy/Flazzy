@@ -1,4 +1,5 @@
-﻿using Flazzy.IO;
+﻿using System.Linq;
+using Flazzy.IO;
 
 namespace Flazzy.ABC
 {
@@ -35,6 +36,19 @@ namespace Flazzy.ABC
         {
             output.WriteInt30(ConstructorIndex);
             base.WriteTo(output);
+        }
+
+        public bool IsImplementingInterface(ASMultiname multiname)
+        {
+            foreach (var @interface in Instance.GetInterfaces())
+            {
+                if (@interface.IsMatch(multiname))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
