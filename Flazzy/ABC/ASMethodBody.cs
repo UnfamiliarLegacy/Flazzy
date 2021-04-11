@@ -21,6 +21,8 @@ namespace Flazzy.ABC
         public override ASMultiname QName => Method.Trait?.QName;
         protected override string DebuggerDisplay => $"LocalCount: {LocalCount:n0}, MaxStack: {MaxStack:n0}";
 
+        private ASCode _cachedCode;
+
         public ASMethodBody(ABCFile abc)
             : base(abc)
         {
@@ -49,9 +51,14 @@ namespace Flazzy.ABC
             PopulateTraits(input);
         }
 
-        public ASCode ParseCode()
+        public ASCode ParseCode(bool ignoreCache = false)
         {
-            return new ASCode(ABC, this);
+            if (_cachedCode != null && !ignoreCache)
+            {
+                return _cachedCode;
+            }
+            
+            return _cachedCode = new ASCode(ABC, this);
         }
         
         public override void WriteTo(FlashWriter output)
