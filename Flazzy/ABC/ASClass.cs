@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Flazzy.IO;
 
 namespace Flazzy.ABC
@@ -49,6 +49,11 @@ namespace Flazzy.ABC
             }
 
             return false;
+        }
+
+        public override string ToString()
+        {
+            return $"ASClass: {QName.Name}";
         }
     }
 }
