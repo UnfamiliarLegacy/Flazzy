@@ -34,10 +34,11 @@ namespace Flazzy
             : this(input, false)
         { }
         public ShockwaveFlash(Stream input, bool leaveOpen)
-            : this(new FlashReader(input, leaveOpen))
-        { }
+            : this(new FlashReader(input, leaveOpen), leaveOpen)
+        {
+        }
 
-        protected ShockwaveFlash(FlashReader input)
+        protected ShockwaveFlash(FlashReader input, bool leaveOpen)
             : this(false)
         {
             Compression = (CompressionKind)input.ReadString(3)[0];
@@ -54,7 +55,7 @@ namespace Flazzy
                 }
                 case CompressionKind.ZLIB:
                 {
-                    _input = ZLIB.WrapDecompressor(input.BaseStream);
+                    _input = ZLIB.WrapDecompressor(input.BaseStream, leaveOpen);
                     break;
                 }
                 case CompressionKind.None:

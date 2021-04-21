@@ -26,9 +26,9 @@ namespace Flazzy.Compression
             }
         }
 
-        public static FlashReader WrapDecompressor(Stream input)
+        public static FlashReader WrapDecompressor(Stream input, bool leaveOpen = false)
         {
-            return new FlashReader(new ZlibStream(input, CompressionMode.Decompress));
+            return new FlashReader(new ZlibStream(input, CompressionMode.Decompress, leaveOpen));
         }
         public static FlashWriter WrapCompressor(Stream output, bool leaveOpen = false)
         {

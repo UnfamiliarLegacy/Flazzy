@@ -32,7 +32,7 @@ namespace Flazzy.IO
             : this(input, encoding, false)
         { }
         public FlashReader(Stream output, Encoding encoding, bool leaveOpen)
-            : base(output, encoding)
+            : base(output, encoding, leaveOpen)
         {
             _leaveOpen = leaveOpen;
         }
@@ -236,7 +236,7 @@ namespace Flazzy.IO
 
         protected override void Dispose(bool disposing)
         {
-            base.Dispose(!_leaveOpen);
+            base.Dispose(disposing);
             if (disposing)
             {
                 IsDisposed = true;
