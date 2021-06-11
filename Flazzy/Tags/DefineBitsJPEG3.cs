@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
-
+using System.IO;
+using Flazzy.Compression;
 using Flazzy.IO;
 using Flazzy.Records;
 
@@ -38,7 +39,25 @@ namespace Flazzy.Tags
 
         public override Color[,] GetARGBMap()
         {
-            throw new NotSupportedException();
+            using (var stream = new MemoryStream(Data))
+            using (var bitmap = new Bitmap(stream))
+            {
+                var alphaChannel = ZLIB.Decompress(AlphaData);
+                var colormap = new Color[bitmap.Width, bitmap.Height];
+
+                for (var x = 0; x < bitmap.Width; x++)
+                {
+                    for (var y = 0; y < bitmap.Height; y++)
+                    {
+                        var pixel = bitmap.GetPixel(x, y);
+                        var alpha = alphaChannel[(bitmap.Width * y) + x];
+                        
+                        colormap[x, y] = Color.FromArgb(alpha, pixel.R, pixel.G, pixel.B);
+                    }
+                }
+
+                return colormap;
+            }
         }
         public override void SetARGBMap(Color[,] map)
         {
