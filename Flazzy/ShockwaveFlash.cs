@@ -11,6 +11,7 @@ namespace Flazzy
 {
     public class ShockwaveFlash : IDisposable
     {
+        private readonly FlashReader _inputOriginal;
         private readonly FlashReader _input;
 
         public List<TagItem> Tags { get; }
@@ -41,6 +42,8 @@ namespace Flazzy
         protected ShockwaveFlash(FlashReader input)
             : this(false)
         {
+            _inputOriginal = input;
+            
             Compression = (CompressionKind)input.ReadString(3)[0];
             Version = input.ReadByte();
             FileLength = input.ReadUInt32();
@@ -106,6 +109,7 @@ namespace Flazzy
 
                 if (tag.Kind == TagKind.End) break;
             }
+            _inputOriginal.Dispose();
             _input.Dispose();
         }
 

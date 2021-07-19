@@ -5,8 +5,6 @@ namespace Flazzy.IO
 {
     public class FlashReader : BinaryReader
     {
-        private readonly bool _leaveOpen;
-
         public long Position
         {
             get => BaseStream.Position;
@@ -34,7 +32,7 @@ namespace Flazzy.IO
         public FlashReader(Stream output, Encoding encoding, bool leaveOpen)
             : base(output, encoding, leaveOpen)
         {
-            _leaveOpen = leaveOpen;
+            
         }
 
         public uint ReadUInt24()
@@ -231,15 +229,6 @@ namespace Flazzy.IO
             {
                 BitPosition = 0;
                 BitContainer = 0;
-            }
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-            if (disposing)
-            {
-                IsDisposed = true;
             }
         }
     }
