@@ -1,6 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <PackageId>Flazzy</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>your_name</Authors>
+    <Company>your_company</Company>
+    <Version>1.0.0</Version>
     <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
