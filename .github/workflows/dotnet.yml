@@ -1,5 +1,11 @@
 name: .NET
 
+on:
+  push:
+    paths:
+      - '.github/workflows/**'
+      - 'Flazzy/**'
+
 jobs:
   build:
     runs-on: ubuntu-latest
