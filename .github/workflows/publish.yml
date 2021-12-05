@@ -22,16 +22,7 @@ jobs:
       with:
         dotnet-version: 6.0.x
 
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build -c Release --no-restore
-
-    - name: Pack
-      run: dotnet pack -c Release --no-build --verbosity normal -o ./build
-
-    - name: Publish
+    - name: Publish on new version
       id: publish_nuget
       uses: rohith/publish-nuget@v2
       with:
