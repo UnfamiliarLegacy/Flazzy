@@ -20,4 +20,4 @@ jobs:
     - name: Build
       run: dotnet build -c Release --no-restore
     - name: Pack
-      run: dotnet pack -c Release --no-build --verbosity normal
+      run: dotnet pack -c Release --no-build --verbosity normal -o ./build
