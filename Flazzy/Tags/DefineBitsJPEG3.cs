@@ -1,33 +1,34 @@
 ﻿using System;
-using System.Drawing;
+using System.Buffers;
+using System.Buffers.Binary;
 using System.IO;
 using Flazzy.Compression;
 using Flazzy.IO;
 using Flazzy.Records;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Flazzy.Tags
 {
-    public class DefineBitsJPEG3 : ImageTag
+    public class DefineBitsJPEG3 : TagItem, IImageTag
     {
-        public ushort Id { get; set; }
-        public byte[] Data { get; set; }
-        public byte[] AlphaData { get; set; }
-
-        public DefineBitsJPEG3()
-            : base(TagKind.DefineBitsJPEG3)
-        { }
-        public DefineBitsJPEG3(HeaderRecord header, FlashReader input)
-            : base(header)
+        public DefineBitsJPEG3() : base(TagKind.DefineBitsJPEG3)
+        {
+        }
+        
+        public DefineBitsJPEG3(HeaderRecord header, FlashReader input) : base(header)
         {
             Id = input.ReadUInt16();
 
-            int alphaDataOffset = input.ReadInt32();
+            var alphaDataOffset = input.ReadInt32();
+            
             Data = input.ReadBytes(alphaDataOffset);
-
             Format = GetFormat(Data);
+            
             if (Format == ImageFormat.JPEG)
             {
-                int partialLength = (2 + 4 + alphaDataOffset);
+                var partialLength = 2 + 4 + alphaDataOffset;
                 AlphaData = input.ReadBytes(Header.Length - partialLength);
             }
             else
@@ -36,43 +37,101 @@ namespace Flazzy.Tags
                 AlphaData = input.ReadBytes(8);
             }
         }
-
-        public override Color[,] GetARGBMap()
+        
+        public ushort Id { get; set; }
+        public ImageFormat Format { get; private set; }
+        public byte[] Data { get; private set; }
+        public byte[] AlphaData { get; private set; }
+        
+        public void SetImage(Image<Rgba32> image)
         {
-            using (var stream = new MemoryStream(Data))
-            using (var bitmap = new Bitmap(stream))
+            // Save image.
+            using var stream = new MemoryStream();
+            
+            image.Save(stream, new JpegEncoder
             {
-                var alphaChannel = ZLIB.Decompress(AlphaData);
-                var colormap = new Color[bitmap.Width, bitmap.Height];
+                Quality = 100
+            });
 
-                for (var x = 0; x < bitmap.Width; x++)
+            Data = stream.ToArray();
+            Format = ImageFormat.JPEG;
+            
+            // Save alpha channel.
+            var alpha = ArrayPool<byte>.Shared.Rent(image.Width * image.Height);
+            
+            for (var y = 0; y < image.Height; y++)
+            {
+                var offset = image.Width * y;
+                var row = image.GetPixelRowSpan(y);
+
+                for (var x = 0; x < image.Width; x++)
                 {
-                    for (var y = 0; y < bitmap.Height; y++)
-                    {
-                        var pixel = bitmap.GetPixel(x, y);
-                        var alpha = alphaChannel[(bitmap.Width * y) + x];
-                        
-                        colormap[x, y] = Color.FromArgb(alpha, pixel.R, pixel.G, pixel.B);
-                    }
+                    alpha[offset + x] = row[x].A;
                 }
-
-                return colormap;
             }
+            
+            AlphaData = ZLIB.Compress(alpha);
         }
-        public override void SetARGBMap(Color[,] map)
+
+        public Image<Rgba32> GetImage()
         {
-            throw new NotSupportedException();
+            if (Format != ImageFormat.JPEG)
+            {
+                throw new NotSupportedException("Only JPEG is supported for GetImage");
+            }
+
+            // Load image.
+            var image = Image.Load(Data);
+            
+            // Apply alpha channel.
+            var alpha = ZLIB.Decompress(AlphaData);
+            
+            for (var y = 0; y < image.Height; y++)
+            {
+                var offset = image.Width * y;
+                var row = image.GetPixelRowSpan(y);
+
+                for (var x = 0; x < image.Width; x++)
+                {
+                    row[x].A = alpha[offset + x];
+                }
+            }
+
+            return image;
+        }
+        
+        private static ImageFormat GetFormat(ReadOnlySpan<byte> data)
+        {
+            if (BinaryPrimitives.ReadInt32LittleEndian(data) == -654321153 || 
+                BinaryPrimitives.ReadInt16LittleEndian(data) == -9985)
+            {
+                return ImageFormat.JPEG;
+            }
+
+            if (BinaryPrimitives.ReadInt64LittleEndian(data) == 727905341920923785)
+            {
+                return ImageFormat.PNG;
+            }
+
+            if (BinaryPrimitives.ReadInt32LittleEndian(data) == 944130375 && 
+                BinaryPrimitives.ReadInt16LittleEndian(data.Slice(4)) == 24889)
+            {
+                return ImageFormat.GIF98a;
+            }
+            
+            throw new ArgumentException("Provided data contains an unknown image format.");
         }
 
         public override int GetBodySize()
         {
-            int size = 0;
+            var size = 0;
             size += sizeof(ushort);
             size += sizeof(uint);
             size += Data.Length;
             size += AlphaData.Length;
             return size;
         }
+        
         protected override void WriteBodyTo(FlashWriter output)
         {
             output.Write(Id);

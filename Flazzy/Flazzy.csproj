@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>UnfamiliarLegacy.Flazzy</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Authors>ArachisH, UnfamiliarLegacy</Authors>
     <Description>Library for editing, and viewing the contents inside a SWF file.</Description>
     <PackageProjectUrl>https://github.com/UnfamiliarLegacy/Flazzy</PackageProjectUrl>
@@ -11,7 +11,6 @@
 
   <ItemGroup>
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
-    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
   </ItemGroup>
 
 </Project>
