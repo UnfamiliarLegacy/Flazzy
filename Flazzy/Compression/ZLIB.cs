@@ -1,7 +1,6 @@
-﻿using System.IO;
-
+﻿using System;
+using System.IO;
 using Flazzy.IO;
-
 using Ionic.Zlib;
 
 namespace Flazzy.Compression
@@ -33,6 +32,19 @@ namespace Flazzy.Compression
         public static FlashWriter WrapCompressor(Stream output, bool leaveOpen = false)
         {
             return new FlashWriter(new ZlibStream(output, CompressionMode.Compress, CompressionLevel.BestCompression, leaveOpen));
+        }
+        
+        public static unsafe void DecompressFast(ReadOnlySpan<byte> source, Span<byte> destination, int decompressedSize) {
+            fixed (byte* pBuffer = &source[0]) {
+                using (var stream = new UnmanagedMemoryStream(pBuffer, source.Length)) 
+                using (var deflateStream = new ZlibStream(stream, CompressionMode.Decompress)) {
+                    var read = deflateStream.Read(destination);
+                    if (read != decompressedSize)
+                    {
+                        throw new Exception($"Decompressed incorrect amount of bytes ({read} != {decompressedSize})");
+                    }
+                }
+            }
         }
     }
 }

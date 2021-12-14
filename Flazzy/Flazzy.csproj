@@ -2,11 +2,12 @@
 
   <PropertyGroup>
     <PackageId>UnfamiliarLegacy.Flazzy</PackageId>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <Authors>ArachisH, UnfamiliarLegacy</Authors>
     <Description>Library for editing, and viewing the contents inside a SWF file.</Description>
     <PackageProjectUrl>https://github.com/UnfamiliarLegacy/Flazzy</PackageProjectUrl>
     <TargetFramework>net6.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

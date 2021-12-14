@@ -79,47 +79,58 @@ namespace Flazzy.Tags
 
         public Image<Rgba32> GetImage()
         {
-            var decompressedData = ZLIB.Decompress(_zlibData);
-            var image = new Image<Rgba32>(Width, Height);
+            var decompressedSize = Width * Height * 4;
+            var decompressedData = ArrayPool<byte>.Shared.Rent(decompressedSize);
 
-            switch (Format)
+            try
             {
-                case Format32BitArgb:
-                    for (var y = 0; y < image.Height; y++)
-                    {
-                        var row = image.GetPixelRowSpan(y);
-                        for (var x = 0; x < image.Width; x++)
+                ZLIB.DecompressFast(_zlibData, decompressedData, decompressedSize);
+                
+                var image = new Image<Rgba32>(Width, Height);
+
+                switch (Format)
+                {
+                    case Format32BitArgb:
+                        for (var y = 0; y < image.Height; y++)
                         {
-                            // Alpha values are premultiplied, recover original values.
-                            var pixel = y * Width * 4 + x * 4;
-                            var alpha = decompressedData[pixel];
-                            if (alpha != 0)
+                            var row = image.GetPixelRowSpan(y);
+                            for (var x = 0; x < image.Width; x++)
                             {
-                                var alphaChange = 255.0d / alpha;
+                                // Alpha values are premultiplied, recover original values.
+                                var pixel = y * Width * 4 + x * 4;
+                                var alpha = decompressedData[pixel];
+                                if (alpha != 0)
+                                {
+                                    var alphaChange = 255.0d / alpha;
                                 
-                                row[x] = new Rgba32(
-                                    (byte)(decompressedData[pixel + 1] * alphaChange),
-                                    (byte)(decompressedData[pixel + 2] * alphaChange),
-                                    (byte)(decompressedData[pixel + 3] * alphaChange),
-                                    alpha);
-                            }
-                            else
-                            {
-                                row[x] = new Rgba32(
-                                    decompressedData[pixel + 1],
-                                    decompressedData[pixel + 2],
-                                    decompressedData[pixel + 3],
-                                    alpha);
+                                    row[x] = new Rgba32(
+                                        (byte)(decompressedData[pixel + 1] * alphaChange),
+                                        (byte)(decompressedData[pixel + 2] * alphaChange),
+                                        (byte)(decompressedData[pixel + 3] * alphaChange),
+                                        alpha);
+                                }
+                                else
+                                {
+                                    row[x] = new Rgba32(
+                                        decompressedData[pixel + 1],
+                                        decompressedData[pixel + 2],
+                                        decompressedData[pixel + 3],
+                                        alpha);
+                                }
                             }
                         }
-                    }
-                    break;
-                default:
-                    image.Dispose();
-                    throw new NotSupportedException($"Unsupported losless format {Format}");
-            }
+                        break;
+                    default:
+                        image.Dispose();
+                        throw new NotSupportedException($"Unsupported losless format {Format}");
+                }
             
-            return image;
+                return image;
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(decompressedData);
+            }
         }
 
         public override int GetBodySize()
