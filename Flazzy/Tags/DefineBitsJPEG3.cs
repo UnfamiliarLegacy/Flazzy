@@ -73,7 +73,7 @@ namespace Flazzy.Tags
             AlphaData = ZLIB.Compress(alpha);
         }
 
-        public Image<Rgba32> GetImage()
+        public Image<Rgba32> GetImage(Configuration configuration = null)
         {
             if (Format != ImageFormat.JPEG)
             {
@@ -81,23 +81,33 @@ namespace Flazzy.Tags
             }
 
             // Load image.
-            var image = Image.Load(Data);
+            var image = Image.Load<Rgba32>(configuration, Data);
             
             // Apply alpha channel.
-            var alpha = ZLIB.Decompress(AlphaData);
-            
-            for (var y = 0; y < image.Height; y++)
+            var alphaSize = image.Width * image.Height;
+            var alpha = ArrayPool<byte>.Shared.Rent(alphaSize);
+
+            try
             {
-                var offset = image.Width * y;
-                var row = image.GetPixelRowSpan(y);
-
-                for (var x = 0; x < image.Width; x++)
+                ZLIB.DecompressFast(AlphaData, alpha, alphaSize);
+            
+                for (var y = 0; y < image.Height; y++)
                 {
-                    row[x].A = alpha[offset + x];
-                }
-            }
+                    var offset = image.Width * y;
+                    var row = image.GetPixelRowSpan(y);
 
-            return image;
+                    for (var x = 0; x < image.Width; x++)
+                    {
+                        row[x].A = alpha[offset + x];
+                    }
+                }
+
+                return image;
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(alpha);
+            }
         }
         
         private static ImageFormat GetFormat(ReadOnlySpan<byte> data)

@@ -77,7 +77,7 @@ namespace Flazzy.Tags
             }
         }
 
-        public Image<Rgba32> GetImage()
+        public Image<Rgba32> GetImage(Configuration configuration = null)
         {
             var decompressedSize = Width * Height * 4;
             var decompressedData = ArrayPool<byte>.Shared.Rent(decompressedSize);
@@ -86,7 +86,7 @@ namespace Flazzy.Tags
             {
                 ZLIB.DecompressFast(_zlibData, decompressedData, decompressedSize);
                 
-                var image = new Image<Rgba32>(Width, Height);
+                var image = new Image<Rgba32>(configuration, Width, Height);
 
                 switch (Format)
                 {
