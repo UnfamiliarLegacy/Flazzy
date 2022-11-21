@@ -1,17 +1,14 @@
-﻿using System;
+﻿namespace Flazzy.ABC.AVM2.Instructions;
 
-namespace Flazzy.ABC.AVM2.Instructions
+public class GetLocal3Ins : Local
 {
-    public class GetLocal3Ins : Local
+    public override int Register
     {
-        public override int Register
-        {
-            get => 3;
-            set => throw new NotSupportedException();
-        }
-
-        public GetLocal3Ins()
-            : base(OPCode.GetLocal_3)
-        { }
+        get => 3;
+        set => throw new NotSupportedException();
     }
+
+    public GetLocal3Ins()
+        : base(OPCode.GetLocal_3)
+    { }
 }

@@ -1,25 +1,22 @@
-﻿using System;
+﻿using Flazzy.IO;
 
-using Flazzy.IO;
+namespace Flazzy.ABC.AVM2.Instructions;
 
-namespace Flazzy.ABC.AVM2.Instructions
+public class IfLessThanIns : Jumper
 {
-    public class IfLessThanIns : Jumper
+    public IfLessThanIns()
+        : base(OPCode.IfLt)
+    { }
+    public IfLessThanIns(FlashReader input)
+        : base(OPCode.IfLt, input)
+    { }
+
+    public override bool? RunCondition(ASMachine machine)
     {
-        public IfLessThanIns()
-            : base(OPCode.IfLt)
-        { }
-        public IfLessThanIns(FlashReader input)
-            : base(OPCode.IfLt, input)
-        { }
+        var right = machine.Values.Pop();
+        var left = machine.Values.Pop();
+        if (left == null || right == null) return null;
 
-        public override bool? RunCondition(ASMachine machine)
-        {
-            var right = machine.Values.Pop();
-            var left = machine.Values.Pop();
-            if (left == null || right == null) return null;
-
-            return Convert.ToDouble(left) < Convert.ToDouble(right);
-        }
+        return Convert.ToDouble(left) < Convert.ToDouble(right);
     }
 }

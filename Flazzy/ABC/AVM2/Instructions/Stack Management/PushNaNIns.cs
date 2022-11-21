@@ -1,17 +1,14 @@
-﻿using System;
+﻿namespace Flazzy.ABC.AVM2.Instructions;
 
-namespace Flazzy.ABC.AVM2.Instructions
+public class PushNaNIns : Primitive
 {
-    public class PushNaNIns : Primitive
+    public override object Value
     {
-        public override object Value
-        {
-            get => double.NaN;
-            set => throw new NotSupportedException();
-        }
-
-        public PushNaNIns()
-            : base(OPCode.PushNan)
-        { }
+        get => double.NaN;
+        set => throw new NotSupportedException();
     }
+
+    public PushNaNIns()
+        : base(OPCode.PushNan)
+    { }
 }

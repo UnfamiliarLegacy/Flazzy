@@ -1,49 +1,46 @@
-﻿using System.Collections.Generic;
+﻿using Flazzy.IO;
 
-using Flazzy.IO;
+namespace Flazzy.ABC;
 
-namespace Flazzy.ABC
+public class ASNamespaceSet : ConstantItem
 {
-    public class ASNamespaceSet : ConstantItem
+    public List<int> NamespaceIndices { get; }
+
+    public ASNamespaceSet(ASConstantPool pool)
+        : base(pool)
     {
-        public List<int> NamespaceIndices { get; }
-
-        public ASNamespaceSet(ASConstantPool pool)
-            : base(pool)
+        NamespaceIndices = new List<int>();
+    }
+    public ASNamespaceSet(ASConstantPool pool, FlashReader input)
+        : this(pool)
+    {
+        NamespaceIndices.Capacity = input.ReadInt30();
+        for (int i = 0; i < NamespaceIndices.Capacity; i++)
         {
-            NamespaceIndices = new List<int>();
+            int namespaceIndex = input.ReadInt30();
+            NamespaceIndices.Add(namespaceIndex);
         }
-        public ASNamespaceSet(ASConstantPool pool, FlashReader input)
-            : this(pool)
+    }
+
+    protected override string DebuggerDisplay => $"Namespaces: {NamespaceIndices.Count:n0}";
+
+    public IEnumerable<(int nsIndex, ASNamespace ns)> GetNamespaces()
+    {
+        for (int i = 0; i < NamespaceIndices.Count; i++)
         {
-            NamespaceIndices.Capacity = input.ReadInt30();
-            for (int i = 0; i < NamespaceIndices.Capacity; i++)
-            {
-                int namespaceIndex = input.ReadInt30();
-                NamespaceIndices.Add(namespaceIndex);
-            }
+            int namespaceIndex = NamespaceIndices[i];
+            ASNamespace @namespace = Pool.Namespaces[namespaceIndex];
+            yield return (namespaceIndex, @namespace);
         }
+    }
 
-        protected override string DebuggerDisplay => $"Namespaces: {NamespaceIndices.Count:n0}";
-
-        public IEnumerable<(int nsIndex, ASNamespace ns)> GetNamespaces()
+    public override void WriteTo(FlashWriter output)
+    {
+        output.WriteInt30(NamespaceIndices.Count);
+        for (int i = 0; i < NamespaceIndices.Count; i++)
         {
-            for (int i = 0; i < NamespaceIndices.Count; i++)
-            {
-                int namespaceIndex = NamespaceIndices[i];
-                ASNamespace @namespace = Pool.Namespaces[namespaceIndex];
-                yield return (namespaceIndex, @namespace);
-            }
-        }
-
-        public override void WriteTo(FlashWriter output)
-        {
-            output.WriteInt30(NamespaceIndices.Count);
-            for (int i = 0; i < NamespaceIndices.Count; i++)
-            {
-                int namespaceIndex = NamespaceIndices[i];
-                output.WriteInt30(namespaceIndex);
-            }
+            int namespaceIndex = NamespaceIndices[i];
+            output.WriteInt30(namespaceIndex);
         }
     }
 }

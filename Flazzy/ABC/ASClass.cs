@@ -1,59 +1,57 @@
-using System.Linq;
 using Flazzy.IO;
 
-namespace Flazzy.ABC
+namespace Flazzy.ABC;
+
+public class ASClass : ASContainer
 {
-    public class ASClass : ASContainer
+    internal int InstanceIndex { get; set; }
+    public ASInstance Instance => ABC.Instances[InstanceIndex];
+
+    public int ConstructorIndex { get; set; }
+    public ASMethod Constructor => ABC.Methods[ConstructorIndex];
+
+    public override bool IsStatic => true;
+    public override ASMultiname QName => Instance.QName;
+    protected override string DebuggerDisplay => ToAS3();
+
+    public ASClass(ABCFile abc)
+        : base(abc)
+    { }
+    public ASClass(ABCFile abc, FlashReader input)
+        : base(abc)
     {
-        internal int InstanceIndex { get; set; }
-        public ASInstance Instance => ABC.Instances[InstanceIndex];
+        ConstructorIndex = input.ReadInt30();
+        Constructor.IsConstructor = true;
+        Constructor.Container = this;
 
-        public int ConstructorIndex { get; set; }
-        public ASMethod Constructor => ABC.Methods[ConstructorIndex];
+        PopulateTraits(input);
+    }
 
-        public override bool IsStatic => true;
-        public override ASMultiname QName => Instance.QName;
-        protected override string DebuggerDisplay => ToAS3();
+    public override string ToAS3()
+    {
+        return Instance.ToAS3();
+    }
+    public override void WriteTo(FlashWriter output)
+    {
+        output.WriteInt30(ConstructorIndex);
+        base.WriteTo(output);
+    }
 
-        public ASClass(ABCFile abc)
-            : base(abc)
-        { }
-        public ASClass(ABCFile abc, FlashReader input)
-            : base(abc)
+    public bool IsImplementingInterface(ASMultiname multiname)
+    {
+        foreach (var @interface in Instance.GetInterfaces())
         {
-            ConstructorIndex = input.ReadInt30();
-            Constructor.IsConstructor = true;
-            Constructor.Container = this;
-
-            PopulateTraits(input);
-        }
-
-        public override string ToAS3()
-        {
-            return Instance.ToAS3();
-        }
-        public override void WriteTo(FlashWriter output)
-        {
-            output.WriteInt30(ConstructorIndex);
-            base.WriteTo(output);
-        }
-
-        public bool IsImplementingInterface(ASMultiname multiname)
-        {
-            foreach (var @interface in Instance.GetInterfaces())
+            if (@interface.IsMatch(multiname))
             {
-                if (@interface.IsMatch(multiname))
-                {
-                    return true;
-                }
+                return true;
             }
-
-            return false;
         }
 
-        public override string ToString()
-        {
-            return $"ASClass: {QName.Name}";
-        }
+        return false;
+    }
+
+    public override string ToString()
+    {
+        return $"ASClass: {QName.Name}";
     }
 }

@@ -1,12 +1,11 @@
-﻿namespace Flazzy.ABC
-{
-    public abstract class ConstantItem : FlashItem
-    {
-        public ASConstantPool Pool { get; }
+﻿namespace Flazzy.ABC;
 
-        public ConstantItem(ASConstantPool pool)
-        {
-            Pool = pool;
-        }
+public abstract class ConstantItem : FlashItem
+{
+    public ASConstantPool Pool { get; }
+
+    public ConstantItem(ASConstantPool pool)
+    {
+        Pool = pool;
     }
 }

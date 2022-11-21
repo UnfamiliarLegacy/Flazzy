@@ -1,14 +1,10 @@
-﻿using System;
-using System.Buffers;
+﻿using System.Buffers;
 using System.Buffers.Binary;
-using System.IO;
 using Flazzy.Compression;
 using Flazzy.IO;
 using Flazzy.Records;
-using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace Flazzy.Tags
 {

@@ -1,17 +1,14 @@
-﻿using System;
+﻿namespace Flazzy.ABC.AVM2.Instructions;
 
-namespace Flazzy.ABC.AVM2.Instructions
+public class PushTrueIns : Primitive
 {
-    public class PushTrueIns : Primitive
+    public override object Value
     {
-        public override object Value
-        {
-            get => true;
-            set => throw new NotSupportedException();
-        }
-
-        public PushTrueIns()
-            : base(OPCode.PushTrue)
-        { }
+        get => true;
+        set => throw new NotSupportedException();
     }
+
+    public PushTrueIns()
+        : base(OPCode.PushTrue)
+    { }
 }

@@ -1,74 +1,72 @@
-﻿using System.Linq;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
-namespace Flazzy.ABC
+namespace Flazzy.ABC;
+
+[DebuggerDisplay("{ToString(),nq}")]
+public class ASParameter
 {
-    [DebuggerDisplay("{ToString(),nq}")]
-    public class ASParameter
+    private readonly ASMethod _method;
+    private readonly ASConstantPool _pool;
+
+    public int ValueIndex { get; set; }
+    public object Value => _pool.GetConstant(ValueKind, ValueIndex);
+
+    public int NameIndex { get; set; }
+    public string Name => _pool.Strings[NameIndex];
+
+    public int TypeIndex { get; set; }
+    public ASMultiname Type => _pool.Multinames[TypeIndex];
+
+    public bool IsOptional { get; set; }
+    public ConstantKind ValueKind { get; set; }
+
+    public ASParameter(ASConstantPool pool, ASMethod method)
     {
-        private readonly ASMethod _method;
-        private readonly ASConstantPool _pool;
+        _pool = pool;
+        _method = method;
+    }
 
-        public int ValueIndex { get; set; }
-        public object Value => _pool.GetConstant(ValueKind, ValueIndex);
-
-        public int NameIndex { get; set; }
-        public string Name => _pool.Strings[NameIndex];
-
-        public int TypeIndex { get; set; }
-        public ASMultiname Type => _pool.Multinames[TypeIndex];
-
-        public bool IsOptional { get; set; }
-        public ConstantKind ValueKind { get; set; }
-
-        public ASParameter(ASConstantPool pool, ASMethod method)
+    public override string ToString()
+    {
+        string name = Name;
+        if (string.IsNullOrWhiteSpace(name))
         {
-            _pool = pool;
-            _method = method;
+            name = ("param" + (_method.Parameters.IndexOf(this) + 1));
         }
 
-        public override string ToString()
+        string type = (Type?.Name ?? "*");
+        if (Type?.Kind == MultinameKind.TypeName)
         {
-            string name = Name;
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                name = ("param" + (_method.Parameters.IndexOf(this) + 1));
-            }
+            type = (Type.QName.Name + ".<");
+            type += string.Join(", ", Type.GetTypes().Select(t => (t?.Name ?? "*")));
+            type += ">";
+        }
 
-            string type = (Type?.Name ?? "*");
-            if (Type?.Kind == MultinameKind.TypeName)
+        string optionalSuffix = string.Empty;
+        if (IsOptional)
+        {
+            optionalSuffix += " = ";
+            switch (ValueKind)
             {
-                type = (Type.QName.Name + ".<");
-                type += string.Join(", ", Type.GetTypes().Select(t => (t?.Name ?? "*")));
-                type += ">";
-            }
-
-            string optionalSuffix = string.Empty;
-            if (IsOptional)
-            {
-                optionalSuffix += " = ";
-                switch (ValueKind)
-                {
-                    case ConstantKind.String:
+                case ConstantKind.String:
                     optionalSuffix += $"\"{Value}\"";
                     break;
 
-                    case ConstantKind.True:
-                    case ConstantKind.False:
+                case ConstantKind.True:
+                case ConstantKind.False:
                     optionalSuffix += Value.ToString().ToLower();
                     break;
 
-                    case ConstantKind.Null:
+                case ConstantKind.Null:
                     optionalSuffix += "null";
                     break;
 
-                    default:
+                default:
                     optionalSuffix += Value;
                     break;
-                }
             }
-
-            return $"{name}:{type}{optionalSuffix}";
         }
+
+        return $"{name}:{type}{optionalSuffix}";
     }
 }

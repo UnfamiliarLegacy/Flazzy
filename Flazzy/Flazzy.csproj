@@ -8,6 +8,7 @@
     <PackageProjectUrl>https://github.com/UnfamiliarLegacy/Flazzy</PackageProjectUrl>
     <TargetFramework>net7.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>true</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>

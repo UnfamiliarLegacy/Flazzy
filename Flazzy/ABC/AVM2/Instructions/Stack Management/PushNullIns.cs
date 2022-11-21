@@ -1,17 +1,14 @@
-﻿using System;
+﻿namespace Flazzy.ABC.AVM2.Instructions;
 
-namespace Flazzy.ABC.AVM2.Instructions
+public class PushNullIns : Primitive
 {
-    public class PushNullIns : Primitive
+    public override object Value
     {
-        public override object Value
-        {
-            get => null;
-            set => throw new NotSupportedException();
-        }
-
-        public PushNullIns()
-            : base(OPCode.PushNull)
-        { }
+        get => null;
+        set => throw new NotSupportedException();
     }
+
+    public PushNullIns()
+        : base(OPCode.PushNull)
+    { }
 }
