@@ -40,9 +40,6 @@ namespace Ionic.Crc
     /// directly by applications wishing to create, read, or manipulate zip
     /// archive files.
     /// </remarks>
-#if !NETCF
-    [ClassInterface(ClassInterfaceType.AutoDispatch)]
-#endif
     [ComVisible(true)]
     [Guid("ebc25cf6-9120-4283-b972-0e5520d0000C")]
     internal class CRC32

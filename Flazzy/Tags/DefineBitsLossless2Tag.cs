@@ -51,24 +51,27 @@ namespace Flazzy.Tags
 
             try
             {
-                for (var y = 0; y < image.Height; y++)
+                image.ProcessPixelRows(pixelAccessor =>
                 {
-                    var row = image.GetPixelRowSpan(y);
-                    for (var x = 0; x < image.Width; x++)
+                    for (var y = 0; y < pixelAccessor.Height; y++)
                     {
-                        var pixel = y * Width * 4 + x * 4;
+                        var row = pixelAccessor.GetRowSpan(y);
+                        for (var x = 0; x < pixelAccessor.Width; x++)
+                        {
+                            var pixel = y * Width * 4 + x * 4;
                         
-                        // Premultiply alpha.
-                        var alpha = row[x].A;
-                        var alphaChange = alpha / 255.0d;
+                            // Premultiply alpha.
+                            var alpha = row[x].A;
+                            var alphaChange = alpha / 255.0d;
                         
-                        data[pixel + 0] = alpha;
-                        data[pixel + 1] = (byte)(row[x].R * alphaChange);
-                        data[pixel + 2] = (byte)(row[x].G * alphaChange);
-                        data[pixel + 3] = (byte)(row[x].B * alphaChange);
+                            data[pixel + 0] = alpha;
+                            data[pixel + 1] = (byte)(row[x].R * alphaChange);
+                            data[pixel + 2] = (byte)(row[x].G * alphaChange);
+                            data[pixel + 3] = (byte)(row[x].B * alphaChange);
+                        }
                     }
-                }
-
+                });
+                
                 _zlibData = ZLIB.Compress(data);
             }
             finally
@@ -91,34 +94,37 @@ namespace Flazzy.Tags
                 switch (Format)
                 {
                     case Format32BitArgb:
-                        for (var y = 0; y < image.Height; y++)
+                        image.ProcessPixelRows(pixelAccessor =>
                         {
-                            var row = image.GetPixelRowSpan(y);
-                            for (var x = 0; x < image.Width; x++)
+                            for (var y = 0; y < pixelAccessor.Height; y++)
                             {
-                                // Alpha values are premultiplied, recover original values.
-                                var pixel = y * Width * 4 + x * 4;
-                                var alpha = decompressedData[pixel];
-                                if (alpha != 0)
+                                var row = pixelAccessor.GetRowSpan(y);
+                                for (var x = 0; x < pixelAccessor.Width; x++)
                                 {
-                                    var alphaChange = 255.0d / alpha;
-                                
-                                    row[x] = new Rgba32(
-                                        (byte)(decompressedData[pixel + 1] * alphaChange),
-                                        (byte)(decompressedData[pixel + 2] * alphaChange),
-                                        (byte)(decompressedData[pixel + 3] * alphaChange),
-                                        alpha);
-                                }
-                                else
-                                {
-                                    row[x] = new Rgba32(
-                                        decompressedData[pixel + 1],
-                                        decompressedData[pixel + 2],
-                                        decompressedData[pixel + 3],
-                                        alpha);
+                                    // Alpha values are premultiplied, recover original values.
+                                    var pixel = y * Width * 4 + x * 4;
+                                    var alpha = decompressedData[pixel];
+                                    if (alpha != 0)
+                                    {
+                                        var alphaChange = 255.0d / alpha;
+                                    
+                                        row[x] = new Rgba32(
+                                            (byte)(decompressedData[pixel + 1] * alphaChange),
+                                            (byte)(decompressedData[pixel + 2] * alphaChange),
+                                            (byte)(decompressedData[pixel + 3] * alphaChange),
+                                            alpha);
+                                    }
+                                    else
+                                    {
+                                        row[x] = new Rgba32(
+                                            decompressedData[pixel + 1],
+                                            decompressedData[pixel + 2],
+                                            decompressedData[pixel + 3],
+                                            alpha);
+                                    }
                                 }
                             }
-                        }
+                        });
                         break;
                     default:
                         image.Dispose();

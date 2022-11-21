@@ -6,6 +6,7 @@ using Flazzy.Compression;
 using Flazzy.IO;
 using Flazzy.Records;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.PixelFormats;
 
@@ -59,16 +60,19 @@ namespace Flazzy.Tags
             // Save alpha channel.
             var alpha = ArrayPool<byte>.Shared.Rent(image.Width * image.Height);
             
-            for (var y = 0; y < image.Height; y++)
+            image.ProcessPixelRows(pixelAccessor =>
             {
-                var offset = image.Width * y;
-                var row = image.GetPixelRowSpan(y);
-
-                for (var x = 0; x < image.Width; x++)
+                for (var y = 0; y < pixelAccessor.Height; y++)
                 {
-                    alpha[offset + x] = row[x].A;
+                    var offset = pixelAccessor.Width * y;
+                    var row = pixelAccessor.GetRowSpan(y);
+
+                    for (var x = 0; x < pixelAccessor.Width; x++)
+                    {
+                        alpha[offset + x] = row[x].A;
+                    }
                 }
-            }
+            });
             
             AlphaData = ZLIB.Compress(alpha);
         }
@@ -81,7 +85,10 @@ namespace Flazzy.Tags
             }
 
             // Load image.
-            var image = Image.Load<Rgba32>(configuration, Data);
+            var image = Image.Load<Rgba32>(new DecoderOptions
+            {
+                Configuration = configuration
+            }, Data);
             
             // Apply alpha channel.
             var alphaSize = image.Width * image.Height;
@@ -91,16 +98,19 @@ namespace Flazzy.Tags
             {
                 ZLIB.DecompressFast(AlphaData, alpha, alphaSize);
             
-                for (var y = 0; y < image.Height; y++)
+                image.ProcessPixelRows(pixelAccessor =>
                 {
-                    var offset = image.Width * y;
-                    var row = image.GetPixelRowSpan(y);
-
-                    for (var x = 0; x < image.Width; x++)
+                    for (var y = 0; y < pixelAccessor.Height; y++)
                     {
-                        row[x].A = alpha[offset + x];
+                        var offset = pixelAccessor.Width * y;
+                        var row = pixelAccessor.GetRowSpan(y);
+
+                        for (var x = 0; x < pixelAccessor.Width; x++)
+                        {
+                            row[x].A = alpha[offset + x];
+                        }
                     }
-                }
+                });
 
                 return image;
             }
