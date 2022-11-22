@@ -11,7 +11,15 @@ public enum CompressionKind
     /// </summary>
     ZLIB = 0x43,
     /// <summary>
+    /// Represents ZLIB compression, encrypted.
+    /// </summary>
+    ZLIB_Encrypted = 0x63,
+    /// <summary>
     /// Represents LZMA compression. (SWF +13)
     /// </summary>
-    LZMA = 0x5A
+    LZMA = 0x5A,
+    /// <summary>
+    /// Represents LZMA compression, encrypted.
+    /// </summary>
+    LZMA_Encrypted = 0x7A
 }

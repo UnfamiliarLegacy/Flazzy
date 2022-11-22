@@ -2,6 +2,8 @@
 using Flazzy.Tags;
 using Flazzy.Records;
 using Flazzy.Compression;
+using Flazzy.Encryption;
+using Ionic.Zlib;
 
 namespace Flazzy;
 
@@ -18,38 +20,43 @@ public class ShockwaveFlash : IDisposable
     public uint FileLength { get; set; }
     public FrameRecord Frame { get; set; }
 
-    public ShockwaveFlash()
-        : this(true)
-    { }
-    public ShockwaveFlash(string path)
-        : this(File.OpenRead(path))
-    { }
-    public ShockwaveFlash(byte[] data)
-        : this(new MemoryStream(data))
-    { }
-    public ShockwaveFlash(Stream input)
-        : this(input, false)
-    { }
-    public ShockwaveFlash(Stream input, bool leaveOpen)
-        : this(new FlashReader(input, leaveOpen))
+    public ShockwaveFlash() : this(true)
     {
     }
 
-    protected ShockwaveFlash(FlashReader input)
-        : this(false)
+    public ShockwaveFlash(string path) : this(File.OpenRead(path))
+    {
+    }
+
+    public ShockwaveFlash(byte[] data) : this(new MemoryStream(data))
+    {
+    }
+
+    public ShockwaveFlash(Stream input, bool leaveOpen = false, ShockwaveFlashOptions options = null) : this(new FlashReader(input, leaveOpen), options)
+    {
+    }
+
+    protected ShockwaveFlash(FlashReader input, ShockwaveFlashOptions options = null) : this(false)
     {
         _inputOriginal = input;
-            
+
         Compression = (CompressionKind)input.ReadString(3)[0];
         Version = input.ReadByte();
         FileLength = input.ReadUInt32();
+
+        if (Compression == CompressionKind.ZLIB_Encrypted || Compression == CompressionKind.LZMA_Encrypted)
+        {
+            if (options?.SwfKeyDeriver == null)
+            {
+                throw new HabboSwfEncryptionException("No SwfKeyDeriver was configured, unable to decrypt swf.");
+            }
+        }
 
         switch (Compression)
         {
             case CompressionKind.LZMA:
             {
-                byte[] decompressed = LZMA.Decompress(input.BaseStream, ((int)FileLength - 8));
-                _input = new FlashReader(decompressed);
+                _input = new FlashReader(LZMA.Decompress(input.BaseStream, (int)FileLength - 8));
                 break;
             }
             case CompressionKind.ZLIB:
@@ -62,9 +69,36 @@ public class ShockwaveFlash : IDisposable
                 _input = input;
                 break;
             }
+            case CompressionKind.ZLIB_Encrypted:
+            {
+                var enc = new HabboSwfEncryption(options!.SwfKeyDeriver);
+                var decrypted = enc.Decrypt(input.BaseStream);
+                
+                decrypted.Seek(8, SeekOrigin.Begin);
+                
+                _input = ZLIB.WrapDecompressor(decrypted);
+                break;
+            }
+            case CompressionKind.LZMA_Encrypted:
+            {
+                var enc = new HabboSwfEncryption(options!.SwfKeyDeriver);
+
+                using var decrypted = enc.Decrypt(input.BaseStream);
+                
+                decrypted.Seek(8, SeekOrigin.Begin);
+                
+                _input = new FlashReader(LZMA.Decompress(decrypted, (int)FileLength - 8));
+                break;
+            }
+            default:
+            {
+                throw new ArgumentOutOfRangeException(nameof(Compression), Compression, "Unknown compression type.");
+            }
         }
+
         Frame = new FrameRecord(_input);
     }
+
     protected ShockwaveFlash(bool isCreatingTemplate)
     {
         Tags = new List<TagItem>();
@@ -141,6 +175,10 @@ public class ShockwaveFlash : IDisposable
             {
                 compressor = ZLIB.WrapCompressor(output.BaseStream, true);
                 break;
+            }
+            default:
+            {
+                throw new ArgumentOutOfRangeException(nameof(compression), compression, null);
             }
         }
 
@@ -238,12 +276,14 @@ public class ShockwaveFlash : IDisposable
     {
         Dispose(true);
     }
+    
     protected virtual void Dispose(bool disposing)
     {
         if (disposing)
         {
             Tags.Clear();
             _input.Dispose();
+            _inputOriginal.Dispose();
         }
     }
 }
