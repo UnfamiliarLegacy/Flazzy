@@ -110,13 +110,15 @@ public class FlashReader : BinaryReader
 
     public string ReadNullString()
     {
-        char currentChar = '\0';
-        string value = string.Empty;
+        var result = new StringBuilder();
+        
+        char currentChar;
         while ((currentChar = ReadChar()) != '\0')
         {
-            value += currentChar;
+            result.Append(currentChar);
         }
-        return value;
+        
+        return result.ToString();
     }
     public string ReadString(int length)
     {

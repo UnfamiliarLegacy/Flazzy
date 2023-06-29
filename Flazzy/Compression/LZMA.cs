@@ -10,7 +10,7 @@ public static class LZMA
 
     static LZMA()
     {
-        _defaultIds = new CoderPropID[]
+        _defaultIds = new[]
         {
             CoderPropID.DictionarySize,
             CoderPropID.PosStateBits,
@@ -21,6 +21,7 @@ public static class LZMA
             CoderPropID.MatchFinder,
             CoderPropID.EndMarker
         };
+        
         _defaultProperties = new object[]
         {
             (1 << 23),
@@ -36,7 +37,7 @@ public static class LZMA
 
     public static byte[] Compress(byte[] data)
     {
-        var encoder = new LZMAEncoder();
+        var encoder = new Encoder();
         encoder.SetCoderProperties(_defaultIds, _defaultProperties);
         using (var input = new MemoryStream(data))
         using (var output = new MemoryStream())
@@ -52,16 +53,10 @@ public static class LZMA
             return compressed;
         }
     }
-    public static byte[] Decompress(byte[] data, int outputLength)
-    {
-        using (var input = new MemoryStream(data))
-        {
-            return Decompress(input, outputLength);
-        }
-    }
+    
     public static byte[] Decompress(Stream input, int outputLength)
     {
-        var decoder = new LZMADecoder();
+        var decoder = new Decoder();
         using (var output = new MemoryStream(outputLength))
         {
             var ignoredData = new byte[4];

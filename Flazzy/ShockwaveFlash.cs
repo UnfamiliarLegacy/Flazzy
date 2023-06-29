@@ -3,7 +3,6 @@ using Flazzy.Tags;
 using Flazzy.Records;
 using Flazzy.Compression;
 using Flazzy.Encryption;
-using Ionic.Zlib;
 
 namespace Flazzy;
 
