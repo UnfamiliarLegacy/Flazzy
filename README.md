@@ -1,4 +1,4 @@
-# Flazzy [![Build Status](https://img.shields.io/github/workflow/status/UnfamiliarLegacy/Flazzy/Flazzy%20Build/master)](https://github.com/UnfamiliarLegacy/Flazzy/actions) [![Nuget](https://img.shields.io/nuget/v/UnfamiliarLegacy.Flazzy)](https://www.nuget.org/packages/UnfamiliarLegacy.Flazzy)
+# Flazzy [![Build Status](https://img.shields.io/github/actions/workflow/status/UnfamiliarLegacy/Flazzy/build.yml?branch=master)](https://github.com/UnfamiliarLegacy/Flazzy/actions) [![Nuget](https://img.shields.io/nuget/v/UnfamiliarLegacy.Flazzy)](https://www.nuget.org/packages/UnfamiliarLegacy.Flazzy)
 
 
 .NET 7.0+ library for editing, and viewing the contents inside a SWF file. There are only a couple of supported tags that this library can manipulate, but instead of listing them here, it would be better just to link you [here](/Flazzy/Tags). It would be easier to see the directory of where the supported tags are contained in this project, rather than having to update this file when a new tag is added.
