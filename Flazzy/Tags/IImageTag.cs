@@ -1,4 +1,7 @@
-﻿namespace Flazzy.Tags;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+
+namespace Flazzy.Tags;
 
 public interface IImageTag
 {
