@@ -17,10 +17,10 @@ public class ConvertUIns : ASInstruction
     public override void Execute(ASMachine machine)
     {
         object result = null;
-        dynamic value = machine.Values.Pop();
+        object value = machine.Values.Pop();
         if (value != null)
         {
-            result = (uint)Convert.ToDouble(value);
+            result = Convert.ToUInt32(value);
         }
         machine.Values.Push(result);
     }

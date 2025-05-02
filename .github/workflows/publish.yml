@@ -15,16 +15,16 @@ jobs:
   Publish:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '9.0.x'
 
     - name: Publish on new version
       id: publish_nuget
-      uses: alirezanet/publish-nuget@v3.0.4
+      uses: alirezanet/publish-nuget@v3.1.0
       with:
         # Filepath of the project to be packaged, relative to root of repository
         PROJECT_FILE_PATH: Flazzy/Flazzy.csproj

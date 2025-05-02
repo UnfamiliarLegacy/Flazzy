@@ -59,11 +59,11 @@ public static class LZMA
         var decoder = new Decoder();
         using (var output = new MemoryStream(outputLength))
         {
-            var ignoredData = new byte[4];
-            input.Read(ignoredData, 0, ignoredData.Length);
+            Span<byte> ignoredData = stackalloc byte[4];
+            input.ReadExactly(ignoredData);
 
             var lzmaProperties = new byte[5];
-            input.Read(lzmaProperties, 0, 5);
+            input.ReadExactly(lzmaProperties, 0, 5);
 
             decoder.SetDecoderProperties(lzmaProperties);
             decoder.Code(input, output, input.Length, outputLength, null);
