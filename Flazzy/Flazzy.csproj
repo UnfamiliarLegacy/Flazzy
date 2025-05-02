@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>UnfamiliarLegacy.Flazzy</PackageId>
-    <Version>1.3.4</Version>
+    <Version>1.3.5</Version>
     <Authors>ArachisH, UnfamiliarLegacy</Authors>
     <Description>Library for editing, and viewing the contents inside a SWF file.</Description>
     <PackageProjectUrl>https://github.com/UnfamiliarLegacy/Flazzy</PackageProjectUrl>
